@@ -1,0 +1,44 @@
+package persist
+
+import (
+	"context"
+	"github.com/olivere/elastic"
+	"github.com/skyeidos/go-spider/src/spider/engine"
+	"log"
+	"reflect"
+	"strings"
+)
+
+type ElasticPersist struct {
+	Client *elastic.Client
+}
+
+func (client *ElasticPersist) Save() (chan []engine.Item, error) {
+	out := make(chan []engine.Item)
+	go func() {
+		itemCount := 0
+		for {
+			items := <-out
+			for _, item := range items {
+				itemCount++
+				log.Printf("Item Saver: Got item #%d: %+v", itemCount, item)
+				index := strings.ToLower(reflect.TypeOf(item.Payload).Name())
+				err := save(client.Client, index, item)
+				if err != nil {
+					log.Printf("Item Saver:error saving item %v : %v", item, err)
+				}
+			}
+		}
+	}()
+	return out, nil
+}
+
+func save(client *elastic.Client, index string, item engine.Item) (err error) {
+	indexService := client.Index().Index(index).
+		Type("doc").Id(item.Id).BodyJson(item)
+	_, err = indexService.Do(context.Background())
+	if err != nil {
+		return err
+	}
+	return nil
+}
