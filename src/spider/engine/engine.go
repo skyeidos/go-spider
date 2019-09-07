@@ -7,30 +7,38 @@ import (
 )
 
 type Engine struct {
-	Persist BasePersist
+	Persist   BasePersist
+	Scheduler Scheduler
+	results   chan Result
 }
 
 func (e *Engine) Run(seeds []Request) {
 	var requests []Request
 	requests = append(requests, seeds...)
-	channel, _ := e.Persist.Save()
-	if channel == nil {
-		log.Fatal("channel is null")
+	resultChannel := e.Scheduler.Run()
+	for _, request := range requests {
+		e.Scheduler.Submit(request)
 	}
-	for len(requests) > 0 {
-		request := requests[0]
-		var result Result
-		result = worker(request)
-		channel <- result.Items
-		requests = append(requests, result.Request...)
-		requests = requests[1:]
+	itemChannel := e.Persist.Save()
+	if itemChannel == nil {
+		log.Fatal("channel in null")
+	}
+	for result := range resultChannel {
+		go func() {
+			for _, request := range result.Request {
+				e.Scheduler.Submit(request)
+			}
+		}()
+		go func() {
+			itemChannel <- result.Items
+		}()
 	}
 }
 
-func worker(request Request) Result {
+func Worker(request Request) Result {
 	content, err := fetcher.Fetch(request.Url)
 	if err != nil {
 		os.Exit(-1)
 	}
-	return request.Parser(content)
+	return request.Parser(content, request.Url)
 }

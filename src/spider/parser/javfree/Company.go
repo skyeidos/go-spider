@@ -6,15 +6,15 @@ import (
 )
 
 var companyRegex = regexp.MustCompile(`<h2 class="entry-title"><a href="(https://javfree.me/[^"]+)">([^<]+)</a></h2>`)
-var nextPageRegex = regexp.MustCompile(`<a class="next page-numbers" href="(https://javfree.me/category/mosaic/prestige-mosaic/page/[0-9]+)">Next</a>`)
+var nextPageRegex = regexp.MustCompile(`<a class="next page-numbers" href="(https://javfree.me/.*?/page/[0-9]+)">Next</a>`)
 
-func CompanyParser(content []byte) engine.Result {
+func CompanyParser(content []byte, url string) engine.Result {
 	matches := companyRegex.FindAllSubmatch(content, -1)
 	var requests []engine.Request
 	for _, m := range matches {
-		name := string(m[2])
 		url := string(m[1])
-		requests = append(requests, engine.Request{Url: url, Parser: func(content []byte) engine.Result {
+		name := string(m[2])
+		requests = append(requests, engine.Request{Url: url, Parser: func(content []byte, url string) engine.Result {
 			return MovieParser(content, name, url)
 		}})
 	}

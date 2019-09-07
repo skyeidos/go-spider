@@ -1,6 +1,6 @@
 package engine
 
-type ParserFunction func(content []byte) Result
+type ParserFunction func(content []byte, url string) Result
 
 type Request struct {
 	Url    string
@@ -15,10 +15,6 @@ type Item struct {
 type Result struct {
 	Request []Request
 	Items   []Item
-}
-
-type BasePersist interface {
-	Save() (chan []Item, error)
 }
 
 func NilParser(_ []byte) Result {

@@ -13,7 +13,7 @@ type ElasticPersist struct {
 	Client *elastic.Client
 }
 
-func (client *ElasticPersist) Save() (chan []engine.Item, error) {
+func (client *ElasticPersist) Save() chan []engine.Item {
 	out := make(chan []engine.Item)
 	go func() {
 		itemCount := 0
@@ -21,7 +21,7 @@ func (client *ElasticPersist) Save() (chan []engine.Item, error) {
 			items := <-out
 			for _, item := range items {
 				itemCount++
-				log.Printf("Item Saver: Got item #%d: %+v", itemCount, item)
+				log.Printf("Item Saver: Got item #%d", itemCount)
 				index := strings.ToLower(reflect.TypeOf(item.Payload).Name())
 				err := save(client.Client, index, item)
 				if err != nil {
@@ -30,7 +30,7 @@ func (client *ElasticPersist) Save() (chan []engine.Item, error) {
 			}
 		}
 	}()
-	return out, nil
+	return out
 }
 
 func save(client *elastic.Client, index string, item engine.Item) (err error) {
