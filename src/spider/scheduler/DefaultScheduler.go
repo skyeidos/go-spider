@@ -1,6 +1,10 @@
 package scheduler
 
-import "github.com/skyeidos/go-spider/src/spider/engine"
+import (
+	"github.com/skyeidos/go-spider/src/spider/engine"
+	"github.com/skyeidos/go-spider/src/spider/fetcher"
+	"os"
+)
 
 type DefaultScheduler struct {
 	requests  chan engine.Request
@@ -26,7 +30,7 @@ func (s *DefaultScheduler) Run() chan engine.Result {
 	for i := 0; i < s.WorkCount; i++ {
 		go func() {
 			for request := range s.requests {
-				result := engine.Worker(request)
+				result := Worker(request)
 				go func() {
 					channel <- result
 				}()
@@ -34,4 +38,12 @@ func (s *DefaultScheduler) Run() chan engine.Result {
 		}()
 	}
 	return channel
+}
+
+func Worker(request engine.Request) engine.Result {
+	content, err := fetcher.Fetch(request.Url)
+	if err != nil {
+		os.Exit(-1)
+	}
+	return request.Parser(content, request.Url)
 }

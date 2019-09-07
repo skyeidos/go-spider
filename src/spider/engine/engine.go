@@ -1,9 +1,7 @@
 package engine
 
 import (
-	"github.com/skyeidos/go-spider/src/spider/fetcher"
 	"log"
-	"os"
 )
 
 type Engine struct {
@@ -35,10 +33,4 @@ func (e *Engine) Run(seeds []Request) {
 	}
 }
 
-func Worker(request Request) Result {
-	content, err := fetcher.Fetch(request.Url)
-	if err != nil {
-		os.Exit(-1)
-	}
-	return request.Parser(content, request.Url)
-}
+
