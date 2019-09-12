@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/olivere/elastic"
 	"github.com/skyeidos/go-spider/src/spider/engine"
 	"github.com/skyeidos/go-spider/src/spider/parser/colly/javfree"
 	"github.com/skyeidos/go-spider/src/spider/persist"
@@ -9,9 +8,8 @@ import (
 )
 
 func main() {
-	client, _ := elastic.NewClient(elastic.SetSniff(false))
 	simpleEngine := engine.Engine{
-		Persist: &persist.ElasticPersist{Client: client},
+		Persist: &persist.CSVPersist{},
 		Scheduler: &scheduler.CollyScheduler{
 			WorkCount: 10,
 		},

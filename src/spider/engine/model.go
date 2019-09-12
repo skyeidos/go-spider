@@ -7,9 +7,13 @@ type Request struct {
 	Parser ParserFunction
 }
 
+type BaseItem interface {
+	ToArray() []string
+}
+
 type Item struct {
 	Id      string
-	Payload interface{}
+	Payload BaseItem
 }
 
 type Result struct {
