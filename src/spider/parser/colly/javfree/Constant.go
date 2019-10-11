@@ -8,12 +8,12 @@ import (
 )
 
 func getCollector() *colly.Collector {
-	collector := colly.NewCollector()
-	err := collector.Limit(&colly.LimitRule{
+		collector := colly.NewCollector()
+		err := collector.Limit(&colly.LimitRule{
 		DomainGlob:  "*",
 		Parallelism: 10,
 	})
-	if err != nil {
+		if err != nil {
 		log.Fatal(err)
 	}
 	pr, err := proxy.RoundRobinProxySwitcher("socks5:localhost:1080")

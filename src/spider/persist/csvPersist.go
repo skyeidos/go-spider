@@ -2,11 +2,12 @@ package persist
 
 import (
 	"encoding/csv"
-	"github.com/skyeidos/go-spider/src/spider/engine"
 	"log"
 	"os"
 	"reflect"
 	"strings"
+
+	"github.com/skyeidos/go-spider/src/spider/engine"
 )
 
 type CSVPersist struct {
