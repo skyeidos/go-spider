@@ -2,8 +2,8 @@ package javfree
 
 import (
 	"github.com/gocolly/colly"
+	"github.com/skyeidos/go-spider/src/model"
 	"github.com/skyeidos/go-spider/src/spider/engine"
-	"github.com/skyeidos/go-spider/src/spider/model"
 	"log"
 	"regexp"
 )
@@ -18,6 +18,7 @@ func MovieParser(_ []byte, title string, url string) engine.Result {
 	var info model.Movie
 	var content string
 	var images []string
+	var requests []engine.Request
 	c.OnHTML("div.entry-content > p", func(element *colly.HTMLElement) {
 		content = element.Text
 	})
@@ -26,18 +27,26 @@ func MovieParser(_ []byte, title string, url string) engine.Result {
 	})
 	if err := c.Visit(url); err != nil {
 		log.Printf("MovieParser error: %v url:%s,", err, url)
-	}
-	id := parserString(idRegex, url)
-	info.ReleaseDate = parserString(releaseDateRegex, content)
-	info.Actor = parserString(actorRegex, content)
-	info.Duration = parserString(durationRegex, content)
-	info.Images = images
-	info.Title = title
-	var items []engine.Item
-	items = append(items, engine.Item{Id: id, Payload: info})
-	return engine.Result{
-		Request: nil,
-		Items:   items,
+		requests = append(requests, engine.Request{Url: url, Parser: func(content []byte, url string) engine.Result {
+			return MovieParser(content, title, url)
+		},})
+		return  engine.Result{
+			Request: requests,
+			Items:   nil,
+		}
+	}else {
+		id := parserString(idRegex, url)
+		info.ReleaseDate = parserString(releaseDateRegex, content)
+		info.Actor = parserString(actorRegex, content)
+		info.Duration = parserString(durationRegex, content)
+		info.Images = images
+		info.Title = title
+		var items []engine.Item
+		items = append(items, engine.Item{Id: id, Payload: info})
+		return engine.Result{
+			Request: nil,
+			Items:   items,
+		}
 	}
 }
 

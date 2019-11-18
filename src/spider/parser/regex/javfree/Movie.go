@@ -2,7 +2,7 @@ package javfree
 
 import (
 	"github.com/skyeidos/go-spider/src/spider/engine"
-	"github.com/skyeidos/go-spider/src/spider/model"
+	"github.com/skyeidos/go-spider/src/model"
 	"regexp"
 )
 
