@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/skyeidos/go-spider/src/spider/engine"
 	"github.com/skyeidos/go-spider/src/spider/parser/colly/javfree"
 	"github.com/skyeidos/go-spider/src/spider/persist"
