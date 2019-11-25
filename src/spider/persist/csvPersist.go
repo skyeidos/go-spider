@@ -13,8 +13,11 @@ import (
 type CSVPersist struct {
 }
 
+var fileHandle map[string]*os.File
+
 func (persist *CSVPersist) Save() chan []engine.Item {
 	out := make(chan []engine.Item)
+	fileHandle = make(map[string]*os.File)
 	go func() {
 		itemCount := 0
 		for {
@@ -35,15 +38,24 @@ func (persist *CSVPersist) Save() chan []engine.Item {
 }
 
 func csvSave(fileName string, item *engine.Item) error {
-	f, err := os.OpenFile(fileName+".csv", os.O_CREATE|os.O_APPEND, 0755)
-	if err != nil {
-		return err
+	var f *os.File
+	if value, ok := fileHandle[fileName]; ok {
+		f = value
+	} else {
+		f, err := os.OpenFile(fileName+".csv", os.O_CREATE|os.O_APPEND, 0755)
+		fileHandle[fileName] = f
+		if err != nil {
+			return err
+		}
 	}
 	writer := csv.NewWriter(f)
 	var rows []string
 	rows = append(rows, item.Id)
 	rows = append(rows, item.Payload.ToArray()...)
-	err = writer.Write(rows)
+	var err = writer.Write(rows)
 	writer.Flush()
-	return err
+	if err != nil {
+		return err
+	}
+	return nil
 }
