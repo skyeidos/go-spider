@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"fmt"
 	"log"
 )
 
@@ -17,6 +18,15 @@ func (e *Engine) Run(seeds []Request) {
 	for _, request := range requests {
 		e.Scheduler.Submit(request)
 	}
+	err := e.Persist.Init()
+	if err != nil {
+		fmt.Printf("error has happend:%v\n", err)
+	}
+	defer func() {
+		if err = e.Persist.Close(); err != nil {
+			fmt.Printf("error has happend:%v\n", err)
+		}
+	}()
 	itemChannel := e.Persist.Save()
 	if itemChannel == nil {
 		log.Fatal("channel in null")
@@ -32,5 +42,3 @@ func (e *Engine) Run(seeds []Request) {
 		}()
 	}
 }
-
-

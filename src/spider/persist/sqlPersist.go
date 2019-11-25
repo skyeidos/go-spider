@@ -9,6 +9,24 @@ import (
 type SQLPersist struct {
 	Driver     string
 	DataSource string
+	ormEngine  *xorm.Engine
+}
+
+func (persist *SQLPersist) Init() error {
+	var err error
+	persist.ormEngine, err = xorm.NewEngine(persist.Driver, persist.Driver)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (persist *SQLPersist) Close() error {
+	err := persist.ormEngine.Close()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (persist *SQLPersist) Save() chan []engine.Item {
@@ -31,12 +49,7 @@ func (persist *SQLPersist) Save() chan []engine.Item {
 }
 
 func dbSave(persist *SQLPersist, item engine.Item) error {
-	ormEngine, err := xorm.NewEngine(persist.Driver, persist.Driver)
-	if err != nil {
-		log.Printf("Item Saver:error saving item %v : %v", item, err)
-		return err
-	}
-	effectRows, err := ormEngine.InsertOne(&item)
+	effectRows, err := persist.ormEngine.InsertOne(&item)
 	if err != nil {
 		log.Printf("Item Saver: error saving item %v : %d", item, err)
 		return err

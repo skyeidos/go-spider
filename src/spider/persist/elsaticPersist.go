@@ -13,6 +13,10 @@ type ElasticPersist struct {
 	Client *elastic.Client
 }
 
+func (persist *ElasticPersist) Close() error {
+	persist.Client.Stop()
+}
+
 func (persist *ElasticPersist) Save() chan []engine.Item {
 	out := make(chan []engine.Item)
 	go func() {

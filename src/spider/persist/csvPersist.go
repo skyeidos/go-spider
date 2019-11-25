@@ -13,11 +13,23 @@ import (
 type CSVPersist struct {
 }
 
+func (persist *CSVPersist) Init() error {
+	fileHandle = make(map[string]*os.File)
+	return nil
+}
+
+func (persist *CSVPersist) Close() error {
+	for _, value := range fileHandle {
+		return value.Close()
+	}
+	return nil
+}
+
 var fileHandle map[string]*os.File
 
 func (persist *CSVPersist) Save() chan []engine.Item {
 	out := make(chan []engine.Item)
-	fileHandle = make(map[string]*os.File)
+
 	go func() {
 		itemCount := 0
 		for {
